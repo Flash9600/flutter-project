@@ -5,22 +5,15 @@ import 'package:flutter/material.dart';
 // import 'package:flutter_hello/navigator.dart';
 import 'package:flutter_hello/pages/main_page.dart';
 //import 'package:flutter_hello/pages/second_page.dart';
-import 'constants/router_arguments.dart';
 import 'pages/second_page.dart';
 
 void main() {
   runApp(MaterialApp(
     title: 'Demo',
-    initialRoute: '/',
-    routes: {SecondPage.routeName: (context) => SecondPage()},
-    onGenerateRoute: (settings) {
-      if (settings.name == MainPage.routeName) {
-        final arguments = settings.arguments != null
-            ? settings.arguments as RouterArguments
-            : RouterArguments('');
-        return MaterialPageRoute<Widget>(
-            builder: (context) => MainPage(takenText: arguments.text));
-      }
+    initialRoute: MainPage.routeName,
+    routes: {
+      MainPage.routeName: (context) => MainPage(),
+      SecondPage.routeName: (context) => SecondPage()
     },
     debugShowCheckedModeBanner: false,
   ));
