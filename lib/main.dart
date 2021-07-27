@@ -16,10 +16,29 @@ class Example extends StatelessWidget {
   }
 }
 
-class IValue {
-  static const String value = 'value';
-  static const String valueTwo = 'valueTwo';
-  IValue();
+class Model extends ChangeNotifier {
+  int? _valueOne;
+  int? _valueTwo;
+  int? _result;
+
+  set valueOne(String value) {
+    _valueOne = int.tryParse(value);
+  }
+
+  set valueTwo(String value) {
+    _valueTwo = int.tryParse(value);
+  }
+
+  get result => _result;
+
+  void sum() {
+    if (_valueOne != null && _valueTwo != null) {
+      _result = _valueOne! + _valueTwo!;
+    } else {
+      _result = null;
+    }
+    notifyListeners();
+  }
 }
 
 class OwnerStatefull extends StatefulWidget {
@@ -30,102 +49,90 @@ class OwnerStatefull extends StatefulWidget {
 }
 
 class _OwnerStatefullState extends State<OwnerStatefull> {
-  var _value = 0;
-  var _valueTwo = 0;
-
-  void _incriment() {
-    _value += 1;
-    setState(() {});
-  }
-
-  void _incrimentTwo() {
-    _valueTwo += 1;
-    setState(() {});
-  }
+  var _model = Model();
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      children: [
-        ElevatedButton(
-          onPressed: _incriment,
-          child: const Text('Tap'),
+    return Center(
+      child: CalcWidgetProvider(
+        model: _model,
+        child: Container(
+          width: 150,
+          height: 300,
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+            children: [
+              const FirstTextField(),
+              const SecondTextField(),
+              Button(),
+              const FieldForResult(),
+            ],
+          ),
         ),
-        ElevatedButton(
-          onPressed: _incrimentTwo,
-          child: const Text('Tap two'),
-        ),
-        ProviderInherited(
-            value: _value, valueTwo: _valueTwo, child: const TextStateless()),
-      ],
+      ),
     );
   }
 }
 
-class ProviderInherited extends InheritedModel<String> {
-  final int value;
-  final int valueTwo;
-
-  const ProviderInherited(
-      {Key? key,
-      required this.value,
-      required this.valueTwo,
-      required Widget child})
-      : super(key: key, child: child);
-
-  @override
-  bool updateShouldNotify(ProviderInherited oldWidget) {
-    return value != oldWidget.value || valueTwo != oldWidget.valueTwo;
-  }
-
-  @override
-  bool updateShouldNotifyDependent(
-      ProviderInherited old, Set<String> dependencies) {
-    if (dependencies.contains(IValue.value)) {
-      return value != old.value;
-    } else if (dependencies.contains(IValue.valueTwo)) {
-      return valueTwo != old.valueTwo;
-    }
-    return false;
-  }
-}
-
-class TextStateless extends StatelessWidget {
-  const TextStateless({Key? key}) : super(key: key);
+class Button extends StatelessWidget {
+  const Button({
+    Key? key,
+  }) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
-    final value = context
-            .dependOnInheritedWidgetOfExactType<ProviderInherited>(
-                aspect: IValue.value)
-            ?.value ??
-        0;
-    return Column(children: [
-      Text('$value'),
-      ChildStatefull(),
-    ]);
+    return ElevatedButton(
+      onPressed: () => CalcWidgetProvider.of(context)?.model.sum(),
+      child: const Text('calc'),
+    );
   }
 }
 
-class ChildStatefull extends StatefulWidget {
-  const ChildStatefull({Key? key}) : super(key: key);
-
-  @override
-  _ChildStatefullState createState() => _ChildStatefullState();
-}
-
-class _ChildStatefullState extends State<ChildStatefull> {
-  var value;
-
-  didChangeDependencies() {
-    value = context
-        .dependOnInheritedWidgetOfExactType<ProviderInherited>(
-            aspect: IValue.valueTwo)
-        ?.valueTwo;
-  }
+class FirstTextField extends StatelessWidget {
+  const FirstTextField({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
+    return TextField(
+      onChanged: (value) =>
+          CalcWidgetProvider.of(context)?.model.valueOne = value,
+      decoration: const InputDecoration(
+          focusedBorder:
+              OutlineInputBorder(borderSide: BorderSide(color: Colors.pink))),
+    );
+  }
+}
+
+class SecondTextField extends StatelessWidget {
+  const SecondTextField({Key? key}) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return TextField(
+      onChanged: (value) =>
+          CalcWidgetProvider.of(context)?.model.valueTwo = value,
+      decoration: InputDecoration(border: OutlineInputBorder()),
+    );
+  }
+}
+
+class FieldForResult extends StatelessWidget {
+  const FieldForResult({Key? key}) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    final value = CalcWidgetProvider.of(context)?.model.result;
     return Text('$value');
   }
+}
+
+class CalcWidgetProvider extends InheritedNotifier<Model> {
+  final Model model;
+
+  const CalcWidgetProvider(
+      {Key? key, required this.model, required Widget child})
+      : super(key: key, child: child, notifier: model);
+
+  static CalcWidgetProvider? of(BuildContext context) =>
+      context.dependOnInheritedWidgetOfExactType<CalcWidgetProvider>();
 }
