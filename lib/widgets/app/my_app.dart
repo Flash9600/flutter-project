@@ -15,11 +15,10 @@ class MyApp extends StatelessWidget {
         GroupsWidget.route: (context) => const GroupsWidget(),
         GroupFormWidget.route: (context) => const GroupFormWidget(),
       },
-      initialRoute: '/groups',
+      initialRoute: GroupsWidget.route,
       theme: ThemeData(
         primarySwatch: Colors.blue,
       ),
-      home: ExampleWidget(),
     );
   }
 }
