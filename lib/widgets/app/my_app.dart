@@ -1,27 +1,61 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_hello/widgets/app/color_bloc.dart';
 
-import 'package:flutter_hello/widgets/example/example_widget.dart';
-import 'package:flutter_hello/widgets/group_form/group_form_widget.dart';
-import 'package:flutter_hello/widgets/groups/groups_widget.dart';
-import 'package:flutter_hello/widgets/task/task_widget.dart';
-import 'package:flutter_hello/widgets/task_form/task_form_widget.dart';
-
-class MyApp extends StatelessWidget {
+class MyApp extends StatefulWidget {
   const MyApp({Key? key}) : super(key: key);
+
+  @override
+  _MyAppState createState() => _MyAppState();
+}
+
+class _MyAppState extends State<MyApp> {
+  ColorBloc _bloc = ColorBloc();
+
+  @override
+  void dispose() {
+    _bloc.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
       title: 'Flutter Demo',
-      routes: {
-        GroupsWidget.route: (context) => const GroupsWidget(),
-        GroupFormWidget.route: (context) => const GroupFormWidget(),
-        TaskWidget.route: (context) => const TaskWidget(),
-        TaskFormWidget.route: (context) => const TaskFormWidget(),
-      },
-      initialRoute: GroupsWidget.route,
-      theme: ThemeData(
-        primarySwatch: Colors.blue,
+      home: Scaffold(
+        appBar: AppBar(
+          title: Text('BLoC with Stream'),
+          centerTitle: true,
+        ),
+        body: Center(
+          child: StreamBuilder<Color>(
+            stream: _bloc.outputStateStream,
+            initialData: Colors.red,
+            builder: (context, snapshot) => AnimatedContainer(
+              height: 100,
+              width: 100,
+              color: snapshot.data,
+              duration: Duration(milliseconds: 500),
+            ),
+          ),
+        ),
+        floatingActionButton: Row(
+          children: <Widget>[
+            FloatingActionButton(
+              backgroundColor: Colors.red,
+              onPressed: () {
+                _bloc.inputEventSink.add(ColorEvent.event_red);
+              },
+            ),
+            SizedBox(
+              width: 10,
+            ),
+            FloatingActionButton(
+                backgroundColor: Colors.green,
+                onPressed: () {
+                  _bloc.inputEventSink.add(ColorEvent.event_green);
+                }),
+          ],
+        ),
       ),
     );
   }
