@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_hello/widgets/task/task_widget.dart';
 
 import 'package:hive/hive.dart';
 import 'package:hive_flutter/hive_flutter.dart';
@@ -17,6 +18,10 @@ class GroupsWidgetModel extends ChangeNotifier {
 
   void showForm(BuildContext context) {
     Navigator.of(context).pushNamed(GroupFormWidget.route);
+  }
+
+  void showTasks(BuildContext context, int groupIndex) {
+    Navigator.of(context).pushNamed(TaskWidget.route);
   }
 
   void _readGroupsFromHive(Box<Group> box) {
